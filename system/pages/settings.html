@@ -67,86 +67,129 @@
 <main>
   <div class="settings-page">
     <h1>Settings</h1>
+    <p class="settings-intro">Tune how WannaSmile looks and behaves. Everything here saves automatically to this browser only.</p>
 
-    <section class="settings-section">
-      <h2>🖼️ Asset Grid Layout</h2>
-      <p class="settings-hint">
-        Control how many assets are shown per row on the Home / Favorites / Discovery
-        grids. Cards and images grow to fill the row — their positions inside each card
-        stay the same, only the size changes. Default is automatic (responsive to your
-        window size / zoom level).
-      </p>
-      <div class="settings-field">
-        <label for="assetsPerRowInput">Assets per row: <span id="assetsPerRowValue">Auto (default)</span></label>
-        <input type="range" id="assetsPerRowInput" min="1" max="8" step="1" value="5">
-      </div>
-      <button type="button" id="assetsPerRowReset" class="overlay-btn">↺ Reset to Default</button>
-    </section>
+    <div class="settings-grid">
 
-    <section class="settings-section">
-      <h2>🕶️ Tab Cloak</h2>
-      <p class="settings-hint">Disguise this tab's title &amp; icon.</p>
-      <div class="settings-field">
-        <label for="presetCloaks">Preset</label>
-        <select id="presetCloaks">
-          <option value="">— choose a preset —</option>
-          <option value="google">Google</option>
-          <option value="drive">Google Drive</option>
-          <option value="classroom">Google Classroom</option>
-          <option value="newtab">New Tab</option>
-          <option value="docs">Google Docs</option>
-          <option value="schoology">Schoology</option>
-          <option value="outlook">Outlook</option>
-          <option value="canvas">Canvas</option>
-        </select>
-      </div>
-      <div class="settings-field">
-        <label for="webname">Tab title</label>
-        <input type="text" id="webname" placeholder="e.g. Google">
-      </div>
-      <div class="settings-field">
-        <label for="webicon">Tab icon URL</label>
-        <input type="text" id="webicon" placeholder="https://...">
-      </div>
-      <button type="button" class="overlay-btn" onclick="setCloakCookie(event)">Set &amp; Enable Cloak</button>
-      <button type="button" class="overlay-btn remove-btn" onclick="clearCloak()">Clear Cloak</button>
-    </section>
+      <section class="settings-section">
+        <div class="settings-section-head">
+          <span class="settings-icon">🖼️</span>
+          <h2>Asset Grid Layout</h2>
+        </div>
+        <p class="settings-hint">
+          Controls the Home / Favorites / Discovery grids. Default is automatic
+          (responsive to your window size / zoom), capped at 5 per row.
+        </p>
+        <div class="settings-field">
+          <label for="assetsPerRowInput">Assets per row <span class="settings-value" id="assetsPerRowValue">Auto (default)</span></label>
+          <input type="range" id="assetsPerRowInput" min="1" max="8" step="1" value="5">
+        </div>
+        <div class="settings-field">
+          <label for="assetImgScaleInput">Asset image size <span class="settings-value" id="assetImgScaleValue">100%</span></label>
+          <input type="range" id="assetImgScaleInput" min="50" max="150" step="5" value="100">
+        </div>
+        <div class="settings-actions">
+          <button type="button" id="assetsPerRowReset" class="overlay-btn">↺ Reset Layout</button>
+        </div>
+      </section>
 
-    <section class="settings-section">
-      <h2>🚨 Panic Button</h2>
-      <p class="settings-hint">Press <kbd>Esc</kbd> to instantly redirect to this URL.</p>
-      <div class="settings-field">
-        <label for="presetPanic">Preset</label>
-        <select id="presetPanic">
-          <option value="">— choose a preset —</option>
-          <option value="google">Google</option>
-          <option value="drive">Google Drive</option>
-          <option value="classroom">Google Classroom</option>
-          <option value="docs">Google Docs</option>
-          <option value="canvas">Canvas</option>
-          <option value="schoology">Schoology</option>
-          <option value="outlook">Outlook</option>
-          <option value="bing">Bing</option>
-          <option value="wikipedia">Wikipedia</option>
-        </select>
-      </div>
-      <div class="settings-field">
-        <label for="panicURL">Panic URL</label>
-        <input type="text" id="panicURL" placeholder="https://...">
-      </div>
-      <button type="button" class="overlay-btn" onclick="setPanicMode(event)">Save Panic URL</button>
-      <button type="button" class="overlay-btn remove-btn" onclick="clearPanicMode()">Clear Panic URL</button>
-    </section>
+      <section class="settings-section">
+        <div class="settings-section-head">
+          <span class="settings-icon">✨</span>
+          <h2>Asset Visuals</h2>
+        </div>
+        <p class="settings-hint">Toggle the little extras shown on asset cards.</p>
+        <div class="settings-field settings-toggle-row">
+          <label for="showOverlaysToggle">Status badges <span class="settings-hint-inline">Featured / New / Fixed</span></label>
+          <input type="checkbox" id="showOverlaysToggle" checked>
+        </div>
+        <div class="settings-field settings-toggle-row">
+          <label for="animatedSwapToggle">Animated previews <span class="settings-hint-inline">hover-style gif/video swaps</span></label>
+          <input type="checkbox" id="animatedSwapToggle" checked>
+        </div>
+      </section>
 
-    <section class="settings-section">
-      <h2>🔒 Access Password</h2>
-      <div class="settings-field">
-        <label for="pass">Password</label>
-        <input type="password" id="pass" placeholder="Enter a password">
-      </div>
-      <button type="button" class="overlay-btn" onclick="setPassword(event)">Set Password</button>
-      <button type="button" class="overlay-btn remove-btn" onclick="delPassword()">Clear Password</button>
-    </section>
+      <section class="settings-section">
+        <div class="settings-section-head">
+          <span class="settings-icon">🕶️</span>
+          <h2>Tab Cloak</h2>
+        </div>
+        <p class="settings-hint">Disguise this tab's title &amp; icon.</p>
+        <div class="settings-field">
+          <label for="presetCloaks">Preset</label>
+          <select id="presetCloaks">
+            <option value="">— choose a preset —</option>
+            <option value="google">Google</option>
+            <option value="drive">Google Drive</option>
+            <option value="classroom">Google Classroom</option>
+            <option value="newtab">New Tab</option>
+            <option value="docs">Google Docs</option>
+            <option value="schoology">Schoology</option>
+            <option value="outlook">Outlook</option>
+            <option value="canvas">Canvas</option>
+          </select>
+        </div>
+        <div class="settings-field">
+          <label for="webname">Tab title</label>
+          <input type="text" id="webname" placeholder="e.g. Google">
+        </div>
+        <div class="settings-field">
+          <label for="webicon">Tab icon URL</label>
+          <input type="text" id="webicon" placeholder="https://...">
+        </div>
+        <div class="settings-actions">
+          <button type="button" class="overlay-btn" onclick="setCloakCookie(event)">Set &amp; Enable Cloak</button>
+          <button type="button" class="overlay-btn remove-btn" onclick="clearCloak()">Clear Cloak</button>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <div class="settings-section-head">
+          <span class="settings-icon">🚨</span>
+          <h2>Panic Button</h2>
+        </div>
+        <p class="settings-hint">Press <kbd>Esc</kbd> to instantly redirect to this URL.</p>
+        <div class="settings-field">
+          <label for="presetPanic">Preset</label>
+          <select id="presetPanic">
+            <option value="">— choose a preset —</option>
+            <option value="google">Google</option>
+            <option value="drive">Google Drive</option>
+            <option value="classroom">Google Classroom</option>
+            <option value="docs">Google Docs</option>
+            <option value="canvas">Canvas</option>
+            <option value="schoology">Schoology</option>
+            <option value="outlook">Outlook</option>
+            <option value="bing">Bing</option>
+            <option value="wikipedia">Wikipedia</option>
+          </select>
+        </div>
+        <div class="settings-field">
+          <label for="panicURL">Panic URL</label>
+          <input type="text" id="panicURL" placeholder="https://...">
+        </div>
+        <div class="settings-actions">
+          <button type="button" class="overlay-btn" onclick="setPanicMode(event)">Save Panic URL</button>
+          <button type="button" class="overlay-btn remove-btn" onclick="clearPanicMode()">Clear Panic URL</button>
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <div class="settings-section-head">
+          <span class="settings-icon">🔒</span>
+          <h2>Access Password</h2>
+        </div>
+        <div class="settings-field">
+          <label for="pass">Password</label>
+          <input type="password" id="pass" placeholder="Enter a password">
+        </div>
+        <div class="settings-actions">
+          <button type="button" class="overlay-btn" onclick="setPassword(event)">Set Password</button>
+          <button type="button" class="overlay-btn remove-btn" onclick="delPassword()">Clear Password</button>
+        </div>
+      </section>
+
+    </div>
   </div>
 </main>
 
@@ -164,57 +207,119 @@
 
 <style>
 .settings-page {
-  max-width: 640px;
+  max-width: 900px;
   margin: 24px auto 60px;
   padding: 0 20px;
   color: var(--url-color, #fff);
   font-family: monospace;
 }
 .settings-page h1 {
-  font-size: 1.6rem;
-  margin-bottom: 16px;
+  font-size: 1.7rem;
+  margin-bottom: 6px;
+}
+.settings-intro {
+  font-size: 0.9rem;
+  opacity: 0.65;
+  margin-bottom: 24px;
+  max-width: 60ch;
+  line-height: 1.5;
+}
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 18px;
+  align-items: start;
 }
 .settings-section {
   background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.06);
   border-radius: 14px;
   padding: 18px 20px;
-  margin-bottom: 18px;
 }
-.settings-section h2 {
-  font-size: 1.05rem;
-  margin-bottom: 8px;
+.settings-section-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
 }
+.settings-icon { font-size: 1.1rem; line-height: 1; }
+.settings-section h2 { font-size: 1.02rem; margin: 0; }
 .settings-hint {
-  font-size: 0.85rem;
-  opacity: 0.75;
-  margin-bottom: 12px;
-  line-height: 1.4;
+  font-size: 0.82rem;
+  opacity: 0.7;
+  margin-bottom: 14px;
+  line-height: 1.45;
 }
-.settings-field {
-  margin-bottom: 12px;
-}
+.settings-hint-inline { opacity: 0.6; font-weight: normal; }
+.settings-field { margin-bottom: 14px; }
+.settings-field:last-of-type { margin-bottom: 0; }
 .settings-field label {
-  display: block;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
   font-size: 0.85rem;
-  opacity: 0.8;
-  margin-bottom: 4px;
+  opacity: 0.85;
+  margin-bottom: 6px;
 }
+.settings-value { font-size: 0.78rem; opacity: 0.65; font-weight: normal; }
 .settings-field input[type="text"],
 .settings-field input[type="password"],
 .settings-field select {
   width: 100%;
-  padding: 8px 10px;
-  border-radius: 6px;
-  border: none;
+  padding: 9px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.08);
   font-size: 14px;
-  background: #333;
+  background: rgba(255,255,255,0.05);
   color: #fff;
 }
 .settings-field input[type="range"] {
   width: 100%;
+  accent-color: var(--accent-color, #ff6f61);
+}
+
+/* Toggle switches (status badges / animated previews) */
+.settings-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.settings-toggle-row label { margin: 0; flex: 1; }
+.settings-toggle-row input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 38px;
+  height: 22px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.15);
+  position: relative;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+.settings-toggle-row input[type="checkbox"]::before {
+  content: "";
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.15s ease;
+}
+.settings-toggle-row input[type="checkbox"]:checked { background: var(--accent-color, #ff6f61); }
+.settings-toggle-row input[type="checkbox"]:checked::before { transform: translateX(16px); }
+
+.settings-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
 }
 .overlay-btn {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   padding: 8px 16px;
   font-size: 14px;
   font-weight: bold;
@@ -222,12 +327,11 @@
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  margin: 4px 4px 0 0;
-  transition: transform .15s, background .15s;
-  background: #444;
+  transition: transform .15s ease, background .15s ease;
+  background: rgba(255,255,255,0.08);
 }
-.overlay-btn:hover { transform: scale(1.04); background: #555; }
-.remove-btn { background: #555; }
+.overlay-btn:hover { transform: scale(1.04); background: rgba(255,255,255,0.16); }
+.remove-btn { background: rgba(255,255,255,0.04); }
 </style>
 
 <script src="../js/utils.js"></script>
@@ -246,4 +350,4 @@
 <script src="../js/gridSettings.js"></script>
 
 </body>
-</html>
+  </html>
