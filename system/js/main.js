@@ -488,6 +488,7 @@ window.addEventListener("load", () => {
         line-height: 1;
         color: inherit;
         flex-shrink: 0;
+        transition: transform 0.15s ease;
       }
       .asset-download-btn {
         background: transparent;
@@ -500,6 +501,7 @@ window.addEventListener("load", () => {
         flex-shrink: 0;
         display: inline-flex;
         align-items: center;
+        transition: transform 0.15s ease;
       }
       .asset-download-btn .fa { pointer-events: none; }
       .asset-action-btn {
@@ -513,8 +515,17 @@ window.addEventListener("load", () => {
         flex-shrink: 0;
         display: inline-flex;
         align-items: center;
+        transition: transform 0.15s ease;
       }
       .asset-action-btn i { pointer-events: none; }
+
+      /* Each button grows on its own hover — the card itself no longer
+         scales while the cursor is anywhere over this row (see main.css). */
+      .card-actions .favorite-star:hover,
+      .card-actions .asset-download-btn:hover,
+      .card-actions .asset-action-btn:hover {
+        transform: scale(1.3);
+      }
 
       .description-panel {
         position: fixed;
@@ -878,7 +889,10 @@ window.addEventListener("load", () => {
       }
 
       const animatedSrc = safeStr(asset.animated || "").trim();
-      if (typeSet.has("animated") && animatedSrc) {
+      const animatedSwapAllowed = typeof window.WS_Grid?.animatedSwapEnabled === "function"
+        ? window.WS_Grid.animatedSwapEnabled()
+        : true;
+      if (typeSet.has("animated") && animatedSrc && animatedSwapAllowed) {
         const isVideo = /\.(mp4|webm|ogg)([?]|$)/i.test(animatedSrc);
         let animEl = null, animTimeout = null, isAnimating = false;
 
