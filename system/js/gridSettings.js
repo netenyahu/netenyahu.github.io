@@ -11,11 +11,14 @@
    grid container, which we now react to continuously via
    ResizeObserver instead of jumping between two fixed states.
 
-   Also exposes window.WS_Grid = { setPerRow(n), reset() } so
-   the Settings page can let a user pin a specific number of
-   assets per row. The override is persisted in localStorage
-   under "assetsPerRow"; a null/absent value means "auto"
-   (the responsive default).
+   Also exposes window.WS_Grid = { setPerRow(n), setImgScale(n),
+   setOverlaysVisible(bool), setAnimatedSwapEnabled(bool), reset() }
+   so the Settings page can let a user pin a specific number of
+   assets per row, scale image size independently of column count,
+   and hide status badges / disable animated hover-swap previews.
+   All of it is persisted in localStorage ("assetsPerRow" absent
+   means "auto", the responsive default) and applies on every page
+   that renders asset cards, not just the Settings page itself.
    ========================================================== */
 
 const WS_GRID_SELECTORS = [
@@ -33,12 +36,33 @@ const WS_GRID_GAP = 15;
 const WS_GRID_PAD = 20;
 const WS_GRID_TARGET_CARD = 220; // desired card width when auto-sizing
 
+// Independent "how big are the images" control. This is a scale factor
+// applied on TOP of whatever size the column math above already picked —
+// it doesn't change how many columns there are, just how large the
+// image within each card renders (card size grows a little too, just
+// enough that a bigger image never spills out of its card).
+const WS_IMG_SCALE_KEY = "assetImgScale";
+const WS_IMG_SCALE_MIN = 0.5;
+const WS_IMG_SCALE_MAX = 1.5;
+
+// Toggle keys for the extra visual flourishes on asset cards.
+const WS_HIDE_OVERLAYS_KEY = "wsHideOverlays";       // "1" = hide status badges
+const WS_DISABLE_ANIM_KEY  = "wsDisableAnimatedSwap"; // "1" = disable hover-swap previews
+
 function _getOverride() {
   const raw = localStorage.getItem(WS_GRID_KEY);
   if (raw === null || raw === "") return null;
   const n = parseInt(raw, 10);
   if (!Number.isFinite(n)) return null;
   return Math.max(WS_GRID_MIN, Math.min(WS_GRID_MAX, n));
+}
+
+function _getImgScale() {
+  const raw = localStorage.getItem(WS_IMG_SCALE_KEY);
+  if (raw === null || raw === "") return 1;
+  const n = parseFloat(raw);
+  if (!Number.isFinite(n)) return 1;
+  return Math.max(WS_IMG_SCALE_MIN, Math.min(WS_IMG_SCALE_MAX, n));
 }
 
 function _computeAutoColumns(width) {
@@ -55,8 +79,10 @@ function _applyToContainer(el) {
   const cols = override || _computeAutoColumns(width);
 
   const cardWidth = (width - WS_GRID_PAD * 2 - WS_GRID_GAP * (cols - 1)) / cols;
-  const imgSize = Math.max(56, Math.min(260, Math.round(cardWidth * 0.72)));
-  const cardSize = Math.max(90, Math.round(cardWidth));
+  const autoImgSize = Math.max(56, Math.min(260, Math.round(cardWidth * 0.72)));
+  const scale = _getImgScale();
+  const imgSize = Math.max(40, Math.min(320, Math.round(autoImgSize * scale)));
+  const cardSize = Math.max(90, Math.round(cardWidth), imgSize + 40);
 
   el.style.setProperty("--assets-per-row", String(cols));
   el.style.setProperty("--asset-img-size", imgSize + "px");
@@ -89,6 +115,10 @@ function _observeContainers() {
   applyGridSettings();
 }
 
+function _applyVisualToggles() {
+  document.body.classList.toggle("ws-hide-overlays", localStorage.getItem(WS_HIDE_OVERLAYS_KEY) === "1");
+}
+
 /* ── public API for the Settings page ─────────────────────── */
 window.WS_Grid = {
   getOverride: _getOverride,
@@ -100,14 +130,39 @@ window.WS_Grid = {
   },
   reset() {
     localStorage.removeItem(WS_GRID_KEY);
+    localStorage.removeItem(WS_IMG_SCALE_KEY);
     applyGridSettings();
   },
   refresh: applyGridSettings,
+
+  getImgScale: _getImgScale,
+  setImgScale(n) {
+    const clamped = Math.max(WS_IMG_SCALE_MIN, Math.min(WS_IMG_SCALE_MAX, parseFloat(n) || 1));
+    localStorage.setItem(WS_IMG_SCALE_KEY, String(clamped));
+    applyGridSettings();
+    return clamped;
+  },
+
+  // Read elsewhere (main.js) to decide whether to skip the animated
+  // hover-swap preview entirely for a given asset.
+  animatedSwapEnabled() {
+    return localStorage.getItem(WS_DISABLE_ANIM_KEY) !== "1";
+  },
+  setOverlaysVisible(visible) {
+    if (visible) localStorage.removeItem(WS_HIDE_OVERLAYS_KEY);
+    else localStorage.setItem(WS_HIDE_OVERLAYS_KEY, "1");
+    _applyVisualToggles();
+  },
+  setAnimatedSwapEnabled(enabled) {
+    if (enabled) localStorage.removeItem(WS_DISABLE_ANIM_KEY);
+    else localStorage.setItem(WS_DISABLE_ANIM_KEY, "1");
+  },
 };
 
 /* ── init ──────────────────────────────────────────────────── */
 function _init() {
   _observeContainers();
+  _applyVisualToggles(); // runs on every page — overlays/animation prefs apply site-wide
 
   // The asset grid is populated asynchronously (fetch + render), so
   // containers may not exist yet, or may still be empty (clientWidth
@@ -123,7 +178,12 @@ function _init() {
   const perRowInput  = document.getElementById("assetsPerRowInput");
   const perRowValue  = document.getElementById("assetsPerRowValue");
   const resetBtn     = document.getElementById("assetsPerRowReset");
-  if (!perRowInput && !resetBtn) return;
+  const imgScaleInput = document.getElementById("assetImgScaleInput");
+  const imgScaleValue = document.getElementById("assetImgScaleValue");
+  const overlaysToggle = document.getElementById("showOverlaysToggle");
+  const animToggle      = document.getElementById("animatedSwapToggle");
+
+  if (!perRowInput && !resetBtn && !imgScaleInput && !overlaysToggle && !animToggle) return;
 
   const current = _getOverride();
   if (perRowInput) {
@@ -137,12 +197,39 @@ function _init() {
       applyGridSettings();
     });
   }
+
+  if (imgScaleInput) {
+    const currentScale = _getImgScale();
+    imgScaleInput.value = Math.round(currentScale * 100);
+    if (imgScaleValue) imgScaleValue.textContent = `${imgScaleInput.value}%`;
+    imgScaleInput.addEventListener("input", () => {
+      const pct = window.WS_Grid.setImgScale(imgScaleInput.value / 100) * 100;
+      if (imgScaleValue) imgScaleValue.textContent = `${Math.round(pct)}%`;
+    });
+  }
+
+  if (overlaysToggle) {
+    overlaysToggle.checked = localStorage.getItem(WS_HIDE_OVERLAYS_KEY) !== "1";
+    overlaysToggle.addEventListener("change", () => {
+      window.WS_Grid.setOverlaysVisible(overlaysToggle.checked);
+    });
+  }
+
+  if (animToggle) {
+    animToggle.checked = window.WS_Grid.animatedSwapEnabled();
+    animToggle.addEventListener("change", () => {
+      window.WS_Grid.setAnimatedSwapEnabled(animToggle.checked);
+    });
+  }
+
   if (resetBtn) {
     resetBtn.addEventListener("click", () => {
       window.WS_Grid.reset();
       if (perRowInput) perRowInput.value = 5;
       if (perRowValue) perRowValue.textContent = "Auto (default)";
-      if (typeof showToast === "function") showToast("Assets-per-row reset to default.");
+      if (imgScaleInput) imgScaleInput.value = 100;
+      if (imgScaleValue) imgScaleValue.textContent = "100%";
+      if (typeof showToast === "function") showToast("Asset grid layout reset to default.");
     });
   }
 }
