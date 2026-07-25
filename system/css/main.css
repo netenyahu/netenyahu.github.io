@@ -431,8 +431,13 @@ align-items: center; /* Vertically centers the child */
   transition: transform 0.2s ease, max-width 0.15s ease;
 }
 
-#container div:hover,
-#container-discov div:hover {
+/* Scale the whole card on hover, EXCEPT while the cursor is over the
+   action-button row — that row gets its own individual per-button
+   hover scale instead (see .card-actions rules, injected by main.js),
+   so hovering one download/favorite/etc. button doesn't drag the
+   whole card (and every other button in it) along with it. */
+#container div:hover:not(:has(.card-actions:hover)),
+#container-discov div:hover:not(:has(.card-actions:hover)) {
   transform: scale(1.03);
 }
 
@@ -491,6 +496,12 @@ align-items: center; /* Vertically centers the child */
 .asset-link:hover img.status-overlay {
   opacity: 0;
   transform: scale(1.05);
+}
+
+/* Settings page > Asset Visuals > "Status badges" toggle, set via
+   gridSettings.js (WS_Grid.setOverlaysVisible). */
+body.ws-hide-overlays .asset-link img.status-overlay {
+  display: none;
 }
 
 /* ==========================================
@@ -1215,4 +1226,4 @@ margin-left:15px;
 .sub-header button.active {
   background: var(--accent-color);
   color: #fff;
-}
+   }
